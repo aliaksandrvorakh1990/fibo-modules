@@ -1,0 +1,5 @@
+rootProject.name = 'fibo-modules'
+
+include 'task-receiver'
+include 'fibo-counter'
+

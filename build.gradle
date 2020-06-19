@@ -1,0 +1,71 @@
+buildscript {
+    ext {
+        springBootVersion = '2.3.0.RELEASE'
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+
+    }
+}
+
+
+subprojects {
+
+    group = 'by.vorakh.dev.fibo'
+    version = '1.0'
+
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'groovy'
+    apply plugin: 'io.spring.dependency-management'
+
+
+    sourceCompatibility = JavaVersion.VERSION_11
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    ext {
+        springVersion = '5.2.7.RELEASE'
+
+        mysqlVersion = '8.0.20'
+        spockVersion = '1.3-groovy-2.5'
+        flywayVersion = '6.4.4'
+        // global
+        annotationVersion = '16.0.3'
+        lombokVersion = '1.18.4'
+
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:$springBootVersion"
+        }
+    }
+
+    dependencies {
+        compileOnly "org.jetbrains:annotations:$annotationVersion"
+        compileOnly "org.projectlombok:lombok:$lombokVersion"
+        annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+        testCompileOnly "org.projectlombok:lombok:$lombokVersion"
+        testCompileOnly "org.jetbrains:annotations:$annotationVersion"
+        testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    }
+
+}
+
+
+
+//task wrapper(type: Wrapper) {
+//    gradleVersion = '6.5'
+//    distributionType = Wrapper.DistributionType.ALL
+//}

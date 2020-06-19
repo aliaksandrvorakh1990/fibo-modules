@@ -1,0 +1,11 @@
+/.idea/
+/**/build
+/**/out
+
+
+# KDE
+*.directory
+
+# gradle
+.gradle
+build
