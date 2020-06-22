@@ -14,7 +14,7 @@ import javax.sql.DataSource;
 @Configuration
 @EnableAsync
 @PropertySource("classpath:jdbc.properties")
-public class JdbcConfig {
+public class JdbcConfiguration {
 
     @Autowired
     private Environment environment;
@@ -30,6 +30,7 @@ public class JdbcConfig {
 
         String driverClassName = environment.getProperty("dataSource.driverClassName");
         String url = environment.getProperty("dataSource.url");
+        System.out.println(url);
         String username = environment.getProperty("dataSource.username");
         String password = environment.getProperty("dataSource.password");
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
