@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-@Log
 @RequiredArgsConstructor
 public class JdbcTaskResultRepository implements TaskResultRepository {
 
