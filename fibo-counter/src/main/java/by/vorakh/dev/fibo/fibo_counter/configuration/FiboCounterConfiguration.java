@@ -17,7 +17,7 @@ import java.util.concurrent.Executor;
 
 @Configuration
 @EnableAsync
-@Import(JdbcConfig.class)
+@Import({JdbcConfiguration.class, FlyWayConfiguration.class})
 public class FiboCounterConfiguration {
 
     @Bean(name = "repositoryExecutor")
