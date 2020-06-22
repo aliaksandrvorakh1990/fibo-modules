@@ -58,10 +58,7 @@ public class TaskServiceImpl implements TaskService {
             .thenApply(task -> Optional.ofNullable(task).orElseThrow(NoExistTaskException::new))
             .thenApply(task -> Optional.of(task).filter(TaskEntity::isCompleted)
                     .orElseThrow(NoCompletedTaskException::new))
-            .thenCombine(taskSolvingService.getResult(taskId), (task, result) -> {
-                log.info(task.toString());
-                return new SolvedTaskViewModel(result);
-            });
+            .thenCombine(taskSolvingService.getResult(taskId), (task, result) -> new SolvedTaskViewModel(result));
     }
 
     private long getTaskPeriod(Timestamp finishTime, Timestamp startTime) {
