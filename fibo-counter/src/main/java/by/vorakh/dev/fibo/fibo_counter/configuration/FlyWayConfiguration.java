@@ -31,12 +31,7 @@ public class FlyWayConfiguration {
             .locations(location)
             .baselineOnMigrate(true)
             .load();
-
-        CompletableFuture.runAsync(() -> {
-            int counter = flyway.migrate();
-
-            log.info("The number of successfully applied migrations:" + counter);
-        });
+        flyway.migrate();
 
         return flyway;
     }
