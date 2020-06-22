@@ -28,20 +28,6 @@ class JdbcTaskRepositoryIntegrationTest extends Specification {
         flyway.clean()
     }
 
-    def "get a task entity with id if the task creates in a database"() {
-
-        given:
-            def number = 3
-            def startTaskTime = new Timestamp(System.currentTimeMillis())
-        when:
-            def result = taskRepository.create(new TaskEntity(number, startTaskTime)).join()
-        then:
-            println(result)
-            result != null
-            result.number == number
-            result.id > 0L
-    }
-
     def "get a task by id if the task was created in a database"() {
 
         given:
@@ -55,6 +41,19 @@ class JdbcTaskRepositoryIntegrationTest extends Specification {
             result.completed == true
             result.startProcessing.toString() == "2020-06-22 13:08:13.0"
             result.finishProcessing.toString() == "2020-06-22 13:09:00.0"
+    }
+
+    def "get a task entity with id if the task creates in a database"() {
+
+        given:
+            def number = 3
+            def startTaskTime = new Timestamp(System.currentTimeMillis())
+        when:
+            def result = taskRepository.create(new TaskEntity(number, startTaskTime)).join()
+        then:
+            result != null
+            result.number == number
+            result.id > 0L
     }
 
     def "get null if task is not reated in a database"() {
