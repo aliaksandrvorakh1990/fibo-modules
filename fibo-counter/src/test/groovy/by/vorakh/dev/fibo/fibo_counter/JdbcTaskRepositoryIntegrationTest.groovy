@@ -20,6 +20,7 @@ class JdbcTaskRepositoryIntegrationTest extends Specification {
 
     void setup() {
 
+        Thread.sleep(1000L)
         flyway.migrate()
     }
 
