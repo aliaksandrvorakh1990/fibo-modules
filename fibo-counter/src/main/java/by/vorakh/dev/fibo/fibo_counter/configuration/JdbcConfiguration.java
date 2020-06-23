@@ -30,7 +30,6 @@ public class JdbcConfiguration {
 
         String driverClassName = environment.getProperty("dataSource.driverClassName");
         String url = environment.getProperty("dataSource.url");
-        System.out.println(url);
         String username = environment.getProperty("dataSource.username");
         String password = environment.getProperty("dataSource.password");
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
