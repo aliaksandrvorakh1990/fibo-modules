@@ -12,12 +12,20 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Import
+import org.springframework.core.env.Environment
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.test.context.jdbc.Sql
+import spock.lang.Shared
 import spock.lang.Specification
 
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application)
+@Sql(executionPhase = BEFORE_TEST_METHOD, scripts = ["/insert_test_data.sql", "/set_autoincrement.sql"])
+@Sql(executionPhase = AFTER_TEST_METHOD, scripts = "/clean_up.sql")
 class RestIntegrationSpec extends Specification {
 
     @LocalServerPort
@@ -26,7 +34,38 @@ class RestIntegrationSpec extends Specification {
     @Autowired
     ApplicationContext context
     @Autowired
-    private TestRestTemplate restTemplate
+    TestRestTemplate restTemplate
+
+    @Autowired
+    Environment environment
+
+    @Shared
+        driverClassName
+    @Shared
+        url
+    @Shared
+        username
+    @Shared
+        password
+
+    void setup() {
+
+        Thread.sleep(2000L)
+        driverClassName = environment.getProperty("dataSource.driverClassName");
+        url = environment.getProperty("dataSource.url");
+        username = environment.getProperty("dataSource.username");
+        password = environment.getProperty("dataSource.password");
+    }
+
+    def cleanupSpec() {
+
+        def connection = groovy.sql.Sql.newInstance(url, username, password, driverClassName)
+        connection.execute("DROP TABLE task_results")
+        connection.execute("DROP TABLE tasks")
+        connection.execute("DROP TABLE flyway_schema_history")
+
+        println("Cleanup database after all tests!")
+    }
 
     def "get task if task is exist and completed"() {
 
@@ -88,10 +127,10 @@ class RestIntegrationSpec extends Specification {
             def url = "http://localhost:" + port + "/task"
         when:
             def response = restTemplate.exchange(url, HttpMethod.POST, request, SuccessCreatingTaskResponse.class)
+            Thread.sleep(3000L)
         then:
             response != null
             response.statusCode.value() == 200
-            println(response.body)
             response.body.taskId >= 3
             response.body.accepted == true
             response.body.timestamp != null
@@ -115,16 +154,12 @@ class RestIntegrationSpec extends Specification {
             def taskId = response.body.taskId
             def taskUrl = url + "/" + taskId
             def noSolvedTaskResponse = restTemplate.exchange(taskUrl, HttpMethod.GET, null, String.class)
-        then:
             noSolvedTaskResponse != null
             noSolvedTaskResponse.statusCode.value() == 204
-        then:
-            Thread.sleep(30000L)
+            Thread.sleep(25000L)
             def solvedTaskResponse = restTemplate.exchange(taskUrl, HttpMethod.GET, null, SolvedTaskViewModel.class)
-        then:
             solvedTaskResponse != null
             solvedTaskResponse.statusCode.value() == 200
-            println(solvedTaskResponse.body)
             solvedTaskResponse.body != null
             solvedTaskResponse.body.result == "0, 1, 1, 2, 3, 5, 8, 13, 21, 34"
     }
