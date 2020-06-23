@@ -34,7 +34,7 @@ class RestIntegrationSpec extends Specification {
             def url = "http://localhost:" + port + "/task/1"
 
         when:
-            def response = this.restTemplate.exchange(url, HttpMethod.GET, null, SolvedTaskViewModel.class)
+            def response = restTemplate.exchange(url, HttpMethod.GET, null, SolvedTaskViewModel.class)
         then:
             response != null
             response.statusCode.value() == 200
@@ -47,7 +47,7 @@ class RestIntegrationSpec extends Specification {
         given:
             def url = "http://localhost:" + port + "/task/2";
         when:
-            def response = this.restTemplate.exchange(url, HttpMethod.GET, null, String.class)
+            def response = restTemplate.exchange(url, HttpMethod.GET, null, String.class)
         then:
             response != null
             response.statusCode.value() == 204
@@ -58,7 +58,7 @@ class RestIntegrationSpec extends Specification {
         given:
             def url = "http://localhost:" + port + "/task/10";
         when:
-            def response = this.restTemplate.exchange(url, HttpMethod.GET, null, String.class)
+            def response = restTemplate.exchange(url, HttpMethod.GET, null, String.class)
         then:
             response != null
             response.statusCode.value() == 404
@@ -73,7 +73,7 @@ class RestIntegrationSpec extends Specification {
             def request = new HttpEntity<SequenceSize>(sequenceSize, headers)
             def url = "http://localhost:" + port + "/task"
         when:
-            def response = this.restTemplate.exchange(url, HttpMethod.POST, request, String.class)
+            def response = restTemplate.exchange(url, HttpMethod.POST, request, String.class)
         then:
             response != null
             response.statusCode.value() == 400
@@ -87,7 +87,7 @@ class RestIntegrationSpec extends Specification {
             def request = new HttpEntity<SequenceSize>(sequenceSize, headers)
             def url = "http://localhost:" + port + "/task"
         when:
-            def response = this.restTemplate.exchange(url, HttpMethod.POST, request, SuccessCreatingTaskResponse.class)
+            def response = restTemplate.exchange(url, HttpMethod.POST, request, SuccessCreatingTaskResponse.class)
         then:
             response != null
             response.statusCode.value() == 200
@@ -95,6 +95,38 @@ class RestIntegrationSpec extends Specification {
             response.body.taskId >= 3
             response.body.accepted == true
             response.body.timestamp != null
+    }
+
+    def "get task response after creating, then get no content if task is not solved, get result if task is solved"() {
+
+        given:
+            def sequenceSize = new SequenceSize(10)
+            def headers = new HttpHeaders()
+            def request = new HttpEntity<SequenceSize>(sequenceSize, headers)
+            def url = "http://localhost:" + port + "/task"
+        when:
+            def response = restTemplate.exchange(url, HttpMethod.POST, request, SuccessCreatingTaskResponse.class)
+        then:
+            response != null
+            response.statusCode.value() == 200
+            response.body.taskId >= 3
+            response.body.accepted == true
+            response.body.timestamp != null
+            def taskId = response.body.taskId
+            def taskUrl = url + "/" + taskId
+            def noSolvedTaskResponse = restTemplate.exchange(taskUrl, HttpMethod.GET, null, String.class)
+        then:
+            noSolvedTaskResponse != null
+            noSolvedTaskResponse.statusCode.value() == 204
+        then:
+            Thread.sleep(30000L)
+            def solvedTaskResponse = restTemplate.exchange(taskUrl, HttpMethod.GET, null, SolvedTaskViewModel.class)
+        then:
+            solvedTaskResponse != null
+            solvedTaskResponse.statusCode.value() == 200
+            println(solvedTaskResponse.body)
+            solvedTaskResponse.body != null
+            solvedTaskResponse.body.result == "0, 1, 1, 2, 3, 5, 8, 13, 21, 34"
     }
 
     @TestConfiguration
