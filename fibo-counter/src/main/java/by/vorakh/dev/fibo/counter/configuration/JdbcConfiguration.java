@@ -1,4 +1,4 @@
-package by.vorakh.dev.fibo.fibo_counter.configuration;
+package by.vorakh.dev.fibo.counter.configuration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -32,11 +32,13 @@ public class JdbcConfiguration {
         String url = environment.getProperty("dataSource.url");
         String username = environment.getProperty("dataSource.username");
         String password = environment.getProperty("dataSource.password");
+
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(driverClassName);
         dataSource.setUrl(url);
         dataSource.setUsername(username);
         dataSource.setPassword(password);
+
         return dataSource;
     }
 }

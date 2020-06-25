@@ -1,4 +1,4 @@
-package by.vorakh.dev.fibo.fibo_counter;
+package by.vorakh.dev.fibo.counter;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
