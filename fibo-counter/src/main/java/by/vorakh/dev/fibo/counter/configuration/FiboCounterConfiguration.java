@@ -2,6 +2,7 @@ package by.vorakh.dev.fibo.counter.configuration;
 
 import by.vorakh.dev.fibo.counter.repository.TaskRepository;
 import by.vorakh.dev.fibo.counter.repository.impl.JdbcTaskRepository;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +41,7 @@ public class FiboCounterConfiguration {
     }
 
     @Bean
-    public TaskRepository taskRepository(JdbcTemplate jdbcTemplate) {
+    public TaskRepository taskRepository(@NotNull JdbcTemplate jdbcTemplate) {
 
         return new JdbcTaskRepository(jdbcTemplate, repositoryExecutor());
     }

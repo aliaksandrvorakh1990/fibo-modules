@@ -4,6 +4,7 @@ import lombok.extern.java.Log;
 import lombok.extern.log4j.Log4j;
 import lombok.extern.log4j.Log4j2;
 import org.flywaydb.core.Flyway;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +23,7 @@ public class FlyWayConfiguration {
     private Environment environment;
 
     @Bean
-    Flyway flyway(DataSource dataSource) {
+    Flyway flyway(@NotNull DataSource dataSource) {
 
         String schema = environment.getProperty("flyway.schemas");
         String location = environment.getProperty("flyway.locations");
