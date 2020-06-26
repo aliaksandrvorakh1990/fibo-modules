@@ -1,9 +1,11 @@
 package by.vorakh.dev.fibo.counter.repository.impl;
 
 import by.vorakh.dev.fibo.counter.exception.NoPresentIdException;
+import by.vorakh.dev.fibo.counter.exception.WrongTaskStatusException;
 import by.vorakh.dev.fibo.counter.repository.TaskRepository;
 import by.vorakh.dev.fibo.counter.repository.entity.TaskEntity;
 import by.vorakh.dev.fibo.counter.repository.entity.TaskStatus;
+import by.vorakh.dev.fibo.counter.validation.TaskStatusValidator;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,7 +30,10 @@ public class JdbcTaskRepository implements TaskRepository {
 
         long id = rs.getLong(1);
         int number = rs.getInt(2);
-        TaskStatus status = TaskStatus.valueOf(rs.getString(3));
+        TaskStatus status = Optional.ofNullable(rs.getString(3))
+            .filter(TaskStatusValidator::isCorrectStatus)
+            .map(TaskStatus::valueOf)
+            .orElseThrow(WrongTaskStatusException::new);
         long startProcessing = rs.getLong(4);
         long finishProcessing = rs.getLong(5);
         String result = rs.getString(6);
@@ -44,11 +49,13 @@ public class JdbcTaskRepository implements TaskRepository {
     private final static String UPDATE_STATUS_BY_TASK_ID =
         "UPDATE tasks SET status = ? WHERE task_id = ?";
 
+    @NotNull
     private final JdbcTemplate jdbcTemplate;
+    @NotNull
     private final Executor repositoryExecutor;
 
     @Override
-    public CompletableFuture<TaskEntity> create(@NotNull TaskEntity task) {
+    public CompletableFuture<@NotNull TaskEntity> create(@NotNull TaskEntity task) {
 
         return CompletableFuture.supplyAsync(
             () -> {
@@ -65,9 +72,12 @@ public class JdbcTaskRepository implements TaskRepository {
                     keyHolder
                 );
 
-                long taskId = Optional.ofNullable(keyHolder.getKey().longValue()).map(Number::longValue)
+                long taskId = Optional.ofNullable(keyHolder.getKey().longValue())
+                    .map(Number::longValue)
                     .orElseThrow(NoPresentIdException::new);
+
                 task.setId(taskId);
+
                 return task;
             },
             repositoryExecutor
@@ -88,7 +98,6 @@ public class JdbcTaskRepository implements TaskRepository {
             repositoryExecutor
         );
     }
-
 
     @Override
     public CompletableFuture<Void> update(
