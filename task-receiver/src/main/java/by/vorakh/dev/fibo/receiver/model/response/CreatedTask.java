@@ -1,4 +1,4 @@
-package by.vorakh.dev.fibo.task_receiver.model.response;
+package by.vorakh.dev.fibo.receiver.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,9 +7,8 @@ import java.sql.Timestamp;
 
 @Data
 @AllArgsConstructor
-public class CreatedTaskViewModel {
+public class CreatedTask {
 
     private long id;
     private Timestamp startProcessing;
-
 }

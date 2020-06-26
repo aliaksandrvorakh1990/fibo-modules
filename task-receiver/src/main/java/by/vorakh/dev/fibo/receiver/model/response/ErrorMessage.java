@@ -1,11 +1,11 @@
-package by.vorakh.dev.fibo.task_receiver.model.response;
+package by.vorakh.dev.fibo.receiver.model.response;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Data
 @RequiredArgsConstructor
-public class MessageViewModel {
+public class ErrorMessage {
 
     private final String message;
 }
