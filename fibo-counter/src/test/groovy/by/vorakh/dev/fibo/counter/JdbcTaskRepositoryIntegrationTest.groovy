@@ -73,7 +73,6 @@ class JdbcTaskRepositoryIntegrationTest extends Specification {
 
         given:
             def newTask = new TaskEntity(2, 1593024953765L)
-
         when:
             def result = taskRepository.create(newTask).join()
         then:
@@ -86,7 +85,6 @@ class JdbcTaskRepositoryIntegrationTest extends Specification {
         given:
             def taskId = 4
             def futureStatus = TaskStatus.PROCESSING
-
         when:
             taskRepository.update(taskId, futureStatus).join()
             def result = taskRepository.getBy(taskId).join()
@@ -94,7 +92,7 @@ class JdbcTaskRepositoryIntegrationTest extends Specification {
             result == new TaskEntity(4, 15, TaskStatus.PROCESSING, 1593024953765L, 0L, null)
     }
 
-    def "update a task when task completed"() {
+    def "update a task when task is completed"() {
 
         given:
             def taskId = 2
