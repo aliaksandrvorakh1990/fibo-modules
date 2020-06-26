@@ -1,5 +1,6 @@
 package by.vorakh.dev.fibo.counter.configuration;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,12 +8,10 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.scheduling.annotation.EnableAsync;
 
 import javax.sql.DataSource;
 
 @Configuration
-@EnableAsync
 @PropertySource("classpath:jdbc.properties")
 public class JdbcConfiguration {
 
@@ -20,13 +19,13 @@ public class JdbcConfiguration {
     private Environment environment;
 
     @Bean
-    public JdbcTemplate jdbcTemplate() {
+    @NotNull JdbcTemplate jdbcTemplate(@NotNull DataSource dataSource) {
 
-        return new JdbcTemplate(dataSource());
+        return new JdbcTemplate(dataSource);
     }
 
     @Bean
-    public DataSource dataSource() {
+    @NotNull DataSource dataSource() {
 
         String driverClassName = environment.getProperty("dataSource.driverClassName");
         String url = environment.getProperty("dataSource.url");

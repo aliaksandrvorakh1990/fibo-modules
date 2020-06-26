@@ -23,7 +23,7 @@ public class FiboCounterConfiguration {
     private Environment environment;
 
     @Bean(name = "repositoryExecutor")
-    public Executor repositoryExecutor() {
+    @NotNull Executor repositoryExecutor() {
 
         int corePoolSize = environment.getProperty("executor.repository.corePoolSize", Integer.class);
         int maxPoolSize = environment.getProperty("executor.repository.maxPoolSize", Integer.class);
@@ -41,8 +41,8 @@ public class FiboCounterConfiguration {
     }
 
     @Bean
-    public TaskRepository taskRepository(@NotNull JdbcTemplate jdbcTemplate) {
+    @NotNull TaskRepository taskRepository(@NotNull JdbcTemplate jdbcTemplate, Executor repositoryExecutor) {
 
-        return new JdbcTaskRepository(jdbcTemplate, repositoryExecutor());
+        return new JdbcTaskRepository(jdbcTemplate, repositoryExecutor);
     }
 }
