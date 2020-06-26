@@ -1,8 +1,10 @@
-package by.vorakh.dev.fibo.task_receiver.exception.handler;
+package by.vorakh.dev.fibo.receiver.exception.handler;
 
-import by.vorakh.dev.fibo.task_receiver.exception.IncorrectFibonacciSequenceSizeException;
-import by.vorakh.dev.fibo.task_receiver.exception.NoCompletedTaskException;
-import by.vorakh.dev.fibo.task_receiver.exception.NoExistTaskException;
+import by.vorakh.dev.fibo.receiver.exception.IncorrectFibonacciSequenceSizeException;
+import by.vorakh.dev.fibo.receiver.exception.NoCompletedTaskException;
+import by.vorakh.dev.fibo.receiver.exception.NoExistTaskException;
+import by.vorakh.dev.fibo.receiver.model.response.ErrorMessage;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +17,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {IncorrectFibonacciSequenceSizeException.class})
-    protected ResponseEntity<?> handleIncorrectSequenceSize(RuntimeException ex, WebRequest request) {
+    protected @NotNull ResponseEntity<?> handleIncorrectSequenceSize(
+        @NotNull RuntimeException ex,
+        @NotNull WebRequest request
+    ) {
 
         String bodyOfResponse = "N should be less than or equals 2000 and be greater than 0";
         return handleExceptionInternal(
             ex,
-            bodyOfResponse,
+            new ErrorMessage(bodyOfResponse),
             new HttpHeaders(),
             HttpStatus.BAD_REQUEST,
             request
@@ -28,12 +33,12 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @ExceptionHandler(value = {NoExistTaskException.class})
-    protected ResponseEntity<?> handleNoExistTask(RuntimeException ex, WebRequest request) {
+    protected @NotNull ResponseEntity<?> handleNoExistTask(@NotNull RuntimeException ex, @NotNull WebRequest request) {
 
         String bodyOfResponse = "Task with this id is not exist.";
         return handleExceptionInternal(
             ex,
-            bodyOfResponse,
+            new ErrorMessage(bodyOfResponse),
             new HttpHeaders(),
             HttpStatus.NOT_FOUND,
             request
@@ -41,12 +46,14 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @ExceptionHandler(value = {NoCompletedTaskException.class})
-    protected ResponseEntity<?> handleNoCompletedTask(RuntimeException ex, WebRequest request) {
+    protected @NotNull ResponseEntity<?> handleNoCompletedTask(
+        @NotNull RuntimeException ex,
+        @NotNull WebRequest request
+    ) {
 
-        String bodyOfResponse = "";
         return handleExceptionInternal(
             ex,
-            bodyOfResponse,
+            null,
             new HttpHeaders(),
             HttpStatus.NO_CONTENT,
             request
