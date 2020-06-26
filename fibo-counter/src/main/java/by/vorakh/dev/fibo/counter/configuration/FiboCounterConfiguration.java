@@ -4,19 +4,22 @@ import by.vorakh.dev.fibo.counter.repository.TaskRepository;
 import by.vorakh.dev.fibo.counter.repository.impl.JdbcTaskRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 
 @Configuration
+@EnableAsync
 @Import({JdbcConfiguration.class, FlyWayConfiguration.class})
-@PropertySource("classpath:executor.properties")
+@PropertySource("classpath:repository-executor.properties")
 public class FiboCounterConfiguration {
 
     @Autowired
@@ -41,7 +44,10 @@ public class FiboCounterConfiguration {
     }
 
     @Bean
-    @NotNull TaskRepository taskRepository(@NotNull JdbcTemplate jdbcTemplate, Executor repositoryExecutor) {
+    @NotNull TaskRepository taskRepository(
+        @NotNull JdbcTemplate jdbcTemplate,
+        @NotNull @Qualifier("repositoryExecutor") Executor repositoryExecutor
+    ) {
 
         return new JdbcTaskRepository(jdbcTemplate, repositoryExecutor);
     }
