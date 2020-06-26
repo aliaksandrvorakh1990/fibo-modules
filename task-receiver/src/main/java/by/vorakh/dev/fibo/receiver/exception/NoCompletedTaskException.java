@@ -1,4 +1,4 @@
-package by.vorakh.dev.fibo.task_receiver.exception;
+package by.vorakh.dev.fibo.receiver.exception;
 
 public class NoCompletedTaskException extends RuntimeException {
 
