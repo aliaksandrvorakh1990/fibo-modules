@@ -26,7 +26,7 @@ class TaskServiceImplTest extends Specification {
     }
     def taskService = new TaskServiceImpl(taskRepository, executor)
 
-    def "get created task if task is created and is processing"() {
+    def "get a creation response if the task is created and is processing"() {
 
         given:
             def number = 2
@@ -45,7 +45,7 @@ class TaskServiceImplTest extends Specification {
             result != null
     }
 
-    def "getting result if task is solved"() {
+    def "get a result if the task is solved"() {
 
         given:
             def taskId = 2L;
@@ -66,7 +66,7 @@ class TaskServiceImplTest extends Specification {
             result.get().status == TaskStatus.COMPLETED
     }
 
-    def "thrown NoExistTaskException if task is not exist"() {
+    def "thrown NoExistTaskException if a task is not exist"() {
 
         given:
             def taskId = 34L;
@@ -79,7 +79,7 @@ class TaskServiceImplTest extends Specification {
             exception.getCause() instanceof NoExistTaskException
     }
 
-    def "thrown NoCompletedTaskException if task status is processing"() {
+    def "thrown NoCompletedTaskException if the task status is processing"() {
 
         given:
             def taskId = 5L;
