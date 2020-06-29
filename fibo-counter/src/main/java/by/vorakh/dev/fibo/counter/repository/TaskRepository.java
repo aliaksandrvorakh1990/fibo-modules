@@ -15,7 +15,7 @@ public interface TaskRepository {
 
     CompletableFuture<Void> update(
         long taskId,
-        long finishProcessing,
+        long endTime,
         @NotNull TaskStatus status,
         @NotNull String result
     );

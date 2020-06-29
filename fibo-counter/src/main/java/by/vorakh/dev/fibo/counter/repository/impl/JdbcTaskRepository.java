@@ -34,18 +34,18 @@ public class JdbcTaskRepository implements TaskRepository {
             .filter(TaskStatusValidator::isCorrectStatus)
             .map(TaskStatus::valueOf)
             .orElseThrow(WrongTaskStatusException::new);
-        long startProcessing = rs.getLong(4);
-        long finishProcessing = rs.getLong(5);
+        long creationTime = rs.getLong(4);
+        long endTime = rs.getLong(5);
         String result = rs.getString(6);
-        return new TaskEntity(id, number, status, startProcessing, finishProcessing, result);
+        return new TaskEntity(id, number, status, creationTime, endTime, result);
     };
 
     private final static String CREATE_TASK =
-        "INSERT INTO tasks (number, status, startProcessing) VALUES (?, ?, ?)";
+        "INSERT INTO tasks (number, status, creationTime) VALUES (?, ?, ?)";
     private final static String SELECT_TASK_BY_ID =
-        "SELECT task_id, number, status, startProcessing, finishProcessing, result FROM tasks WHERE task_id = ?";
+        "SELECT task_id, number, status, creationTime, endTime, result FROM tasks WHERE task_id = ?";
     private final static String UPDATE_STATUS_FINISH_PROCESSING_RESULT_BY_TASK_ID =
-        "UPDATE tasks SET status = ? , finishProcessing = ?, result = ? WHERE task_id = ?";
+        "UPDATE tasks SET status = ? , endTime = ?, result = ? WHERE task_id = ?";
     private final static String UPDATE_STATUS_BY_TASK_ID =
         "UPDATE tasks SET status = ? WHERE task_id = ?";
 
@@ -66,7 +66,7 @@ public class JdbcTaskRepository implements TaskRepository {
 
                         ps.setInt(1, task.getNumber());
                         ps.setString(2, task.getStatus().toString());
-                        ps.setLong(3, task.getStartProcessing());
+                        ps.setLong(3, task.getCreationTime());
                         return ps;
                     },
                     keyHolder
@@ -102,14 +102,14 @@ public class JdbcTaskRepository implements TaskRepository {
     @Override
     public CompletableFuture<Void> update(
         long taskId,
-        long finishProcessing,
+        long endTime,
         @NotNull TaskStatus status,
         @NotNull String result
     ) {
 
         return runAsync(
             () -> jdbcTemplate.update(UPDATE_STATUS_FINISH_PROCESSING_RESULT_BY_TASK_ID,
-                status.toString(), finishProcessing, result, taskId),
+                status.toString(), endTime, result, taskId),
             repositoryExecutor
         );
     }
