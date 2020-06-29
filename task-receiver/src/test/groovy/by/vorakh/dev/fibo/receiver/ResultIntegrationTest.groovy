@@ -1,6 +1,7 @@
 package by.vorakh.dev.fibo.receiver
 
 import by.vorakh.dev.fibo.Application
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -24,6 +25,9 @@ class ResultIntegrationTest extends Specification {
 
     @Autowired
     TestRestTemplate client
+
+    @Autowired
+    final ObjectMapper objectMapper
 
     @Autowired
     Environment environment
@@ -65,7 +69,14 @@ class ResultIntegrationTest extends Specification {
         then:
             response != null
             response.statusCode.value() == 200
-            response.body == "{\"status\":\"COMPLETED\",\"result\":\"0, 1\"}"
+
+        when:
+            def body = objectMapper.readTree(response.body)
+        then:
+            body.path("status").asText() != null
+            body.path("status").asText() == "COMPLETED"
+            body.path("result").asText() != null
+            body.path("result").asText() == "0, 1"
     }
 
     def "get a result response with the failed status and a null result if the task was failed"() {
@@ -77,7 +88,12 @@ class ResultIntegrationTest extends Specification {
         then:
             response != null
             response.statusCode.value() == 200
-            response.body == "{\"status\":\"FAILED\",\"result\":null}"
+        when:
+            def body = objectMapper.readTree(response.body)
+        then:
+            body.path("status").asText() != null
+            body.path("status").asText() == "FAILED"
+            body.path("result").isNull() == true
     }
 
     def "get no content if a task has the CREATED status in the DB"() {

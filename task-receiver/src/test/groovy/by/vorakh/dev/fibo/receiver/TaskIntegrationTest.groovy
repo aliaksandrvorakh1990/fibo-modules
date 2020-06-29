@@ -2,6 +2,7 @@ package by.vorakh.dev.fibo.receiver
 
 import by.vorakh.dev.fibo.Application
 import by.vorakh.dev.fibo.receiver.model.payload.SequenceSize
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -27,6 +28,9 @@ class TaskIntegrationTest extends Specification {
 
     @Autowired
     TestRestTemplate client
+
+    @Autowired
+    final ObjectMapper objectMapper
 
     @Autowired
     Environment environment
@@ -71,7 +75,10 @@ class TaskIntegrationTest extends Specification {
         then:
             response != null
             response.statusCode.value() == 400
-            response.body == "{\"message\":\"N should be less than or equals 2000 and be greater than 0\"}"
+        when:
+            def body = objectMapper.readTree(response.body)
+        then:
+            body.path("message").asText() != null
     }
 
     def "get a response for a created task if the created task with correct data"() {
@@ -87,6 +94,10 @@ class TaskIntegrationTest extends Specification {
         then:
             response != null
             response.statusCode.value() == 200
-            response.body.contains("\"id\":1,\"creationTime\":") == true
+        when:
+            def body = objectMapper.readTree(response.body)
+        then:
+            body.path("id").asLong() == 1
+            body.path("creationTime").asText() != null
     }
 }
