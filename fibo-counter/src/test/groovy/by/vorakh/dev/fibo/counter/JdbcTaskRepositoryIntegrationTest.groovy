@@ -5,7 +5,6 @@ import by.vorakh.dev.fibo.counter.repository.entity.TaskEntity
 import by.vorakh.dev.fibo.counter.repository.entity.TaskStatus
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.ApplicationContext
 import org.springframework.core.env.Environment
 import org.springframework.test.context.jdbc.Sql
 import spock.lang.Shared
@@ -21,9 +20,6 @@ class JdbcTaskRepositoryIntegrationTest extends Specification {
 
     @Autowired
     TaskRepository taskRepository
-
-    @Autowired
-    ApplicationContext context
 
     @Autowired
     Environment environment
@@ -98,11 +94,11 @@ class JdbcTaskRepositoryIntegrationTest extends Specification {
             def taskId = 2
             def completedStatus = TaskStatus.COMPLETED
             def result = "0, 1, 1, 2"
-            def finishProcessing = 1593024993765L
+            def endTime = 1593024993765L
         when:
-            taskRepository.update(taskId, finishProcessing, completedStatus, result).join()
+            taskRepository.update(taskId, endTime, completedStatus, result).join()
             def actual = taskRepository.getBy(taskId).join()
         then:
-            actual == new TaskEntity(taskId, 4, completedStatus, 1593024256765L, finishProcessing, result)
+            actual == new TaskEntity(taskId, 4, completedStatus, 1593024256765L, endTime, result)
     }
 }
