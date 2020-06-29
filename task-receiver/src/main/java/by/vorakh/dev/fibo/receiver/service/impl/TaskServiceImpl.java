@@ -7,8 +7,8 @@ import by.vorakh.dev.fibo.receiver.exception.ImpossibleSolvingTaskException;
 import by.vorakh.dev.fibo.receiver.exception.NoCompletedTaskException;
 import by.vorakh.dev.fibo.receiver.exception.NoExistTaskException;
 import by.vorakh.dev.fibo.receiver.model.payload.SequenceSize;
-import by.vorakh.dev.fibo.receiver.model.response.CreatedTask;
-import by.vorakh.dev.fibo.receiver.model.response.TaskResponse;
+import by.vorakh.dev.fibo.receiver.model.response.CreationResponse;
+import by.vorakh.dev.fibo.receiver.model.response.ResultResponse;
 import by.vorakh.dev.fibo.receiver.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -21,6 +21,7 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static by.vorakh.dev.fibo.receiver.converter.TimeInMillisToUtcDateTimeConverter.convertUtcDateTimeFormat;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Log
@@ -31,13 +32,13 @@ public class TaskServiceImpl implements TaskService {
     private final Executor serviceExecutor;
 
     @Override
-    public CompletableFuture<@NotNull CreatedTask> createTask(@NotNull SequenceSize sequenceSize) {
+    public CompletableFuture<@NotNull CreationResponse> createTask(@NotNull SequenceSize sequenceSize) {
 
-        long startProcessing = System.currentTimeMillis();
-        return taskRepository.create(new TaskEntity(sequenceSize.getSize(), startProcessing))
+        long creationTime = System.currentTimeMillis();
+        return taskRepository.create(new TaskEntity(sequenceSize.getSize(), creationTime))
             .thenApply(task -> {
                 solveTask(task);
-                return new CreatedTask(task.getId(), new Timestamp(task.getStartProcessing()));
+                return new CreationResponse(task.getId(), convertUtcDateTimeFormat(creationTime));
             });
     }
 
@@ -56,30 +57,30 @@ public class TaskServiceImpl implements TaskService {
                 return result;
             })
             .thenAccept(result -> {
-                long finishProcessing = System.currentTimeMillis();
-                taskRepository.update(taskId, finishProcessing, TaskStatus.COMPLETED, result)
+                long endTime = System.currentTimeMillis();
+                taskRepository.update(taskId, endTime, TaskStatus.COMPLETED, result)
                     .handle((aVoid, throwable) -> {
                         if (throwable != null) {
                             log.info(throwable.getMessage());
                         }
-                        log.info("Task is solved in " + new Timestamp(finishProcessing));
+                        log.info("Task is solved in " + new Timestamp(endTime));
                         return null;
                     });
             });
     }
 
     @Override
-    public CompletableFuture<@NotNull TaskResponse> getTaskResult(long taskId) {
+    public CompletableFuture<@NotNull ResultResponse> getTaskResult(long taskId) {
 
         return taskRepository.getBy(taskId)
             .thenApply(task -> {
                 if (task == null) {
                     throw new NoExistTaskException();
                 }
-                if (task.getStatus() == TaskStatus.PROCESSING) {
+                if ((task.getStatus() == TaskStatus.CREATED) || (task.getStatus() == TaskStatus.PROCESSING)) {
                     throw new NoCompletedTaskException();
                 }
-                return new TaskResponse(task.getStatus(), task.getResult());
+                return new ResultResponse(task.getStatus(), task.getResult());
             });
     }
 
