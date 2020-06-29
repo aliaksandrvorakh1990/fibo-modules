@@ -1,6 +1,5 @@
 package by.vorakh.dev.fibo.counter.configuration;
 
-import lombok.extern.java.Log;
 import org.flywaydb.core.Flyway;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.core.env.Environment;
 
 import javax.sql.DataSource;
 
-@Log
 @Configuration
 @PropertySource("classpath:flyway.properties")
 public class FlyWayConfiguration {
@@ -32,9 +30,7 @@ public class FlyWayConfiguration {
             .baselineOnMigrate(true)
             .load();
 
-        int counter = flyway.migrate();
-
-        log.info("Migrate:" + counter);
+        flyway.migrate();
 
         return flyway;
     }
