@@ -5,10 +5,11 @@ import by.vorakh.dev.fibo.counter.repository.entity.TaskEntity
 import by.vorakh.dev.fibo.counter.repository.entity.TaskStatus
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.core.env.Environment
 import org.springframework.test.context.jdbc.Sql
 import spock.lang.Shared
 import spock.lang.Specification
+
+import javax.sql.DataSource
 
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD
@@ -22,30 +23,20 @@ class JdbcTaskRepositoryIntegrationTest extends Specification {
     TaskRepository taskRepository
 
     @Autowired
-    Environment environment
+    DataSource dataSource
 
     @Shared
-        driverClassName
-    @Shared
-        url
-    @Shared
-        username
-    @Shared
-        password
+        connection
 
     void setup() {
 
-        if (driverClassName == null) {
-            driverClassName = environment.getProperty("dataSource.driverClassName");
-            url = environment.getProperty("dataSource.url");
-            username = environment.getProperty("dataSource.username");
-            password = environment.getProperty("dataSource.password");
+        if (connection == null) {
+            connection = new groovy.sql.Sql(dataSource)
         }
     }
 
     def cleanupSpec() {
 
-        def connection = groovy.sql.Sql.newInstance(url, username, password, driverClassName)
         connection.execute("DROP TABLE tasks")
         connection.execute("DROP TABLE flyway_schema_history")
         println("Cleanup database after all tests!")
