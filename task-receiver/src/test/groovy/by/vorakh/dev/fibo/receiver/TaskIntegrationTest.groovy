@@ -10,18 +10,12 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
-import org.springframework.test.context.jdbc.Sql
 import spock.lang.Shared
 import spock.lang.Specification
 
 import javax.sql.DataSource
 
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application)
-@Sql(executionPhase = BEFORE_TEST_METHOD, scripts = ["/set_autoincrement.sql"])
-@Sql(executionPhase = AFTER_TEST_METHOD, scripts = ["/clean_up.sql"])
 class TaskIntegrationTest extends Specification {
 
     @LocalServerPort
@@ -37,7 +31,7 @@ class TaskIntegrationTest extends Specification {
     DataSource dataSource
 
     @Shared
-        connection
+    groovy.sql.Sql connection
 
     void setup() {
 
@@ -75,10 +69,13 @@ class TaskIntegrationTest extends Specification {
     def "get a response for a created task if the created task with correct data"() {
 
         given:
-            def sequenceSize = new SequenceSize(2)
+            def size = 2
+            def sequenceSize = new SequenceSize(size)
             def headers = new HttpHeaders()
             def request = new HttpEntity<SequenceSize>(sequenceSize, headers)
             def url = "http://localhost:" + port + "/task"
+        and:
+            def currentTimeMillis = System.currentTimeMillis()
         when:
             def response = client.exchange(url, HttpMethod.POST, request, String.class)
             Thread.sleep(3000L)
@@ -90,5 +87,18 @@ class TaskIntegrationTest extends Specification {
         then:
             body.path("id").asLong() == 1
             body.path("creationTime").asText() != null
+        and:
+            def id = body.path("id").asLong()
+        when:
+            def result = connection.firstRow('SELECT task_id, number, status, creationTime, endTime, result FROM tasks WHERE task_id = ?', id)
+        then:
+            result != null
+            result.get("task_id") == id
+            result.get("number") == size
+            result.get("status") != null
+            result.get("creationTime") > currentTimeMillis
+            result.get("endTime") > currentTimeMillis
+            result.get("result") != null
+            result.get("result") == "0, 1"
     }
 }
