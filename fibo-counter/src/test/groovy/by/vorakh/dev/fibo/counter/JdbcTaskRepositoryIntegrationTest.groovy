@@ -80,7 +80,7 @@ class JdbcTaskRepositoryIntegrationTest extends Specification {
             result == new TaskEntity(5, 2, TaskStatus.CREATED, 1593024953765L, 0L, null)
     }
 
-    def "update a task status by id and new status"() {
+    def "update a task status by id and a new status"() {
 
         given:
             def taskId = 4
@@ -92,7 +92,7 @@ class JdbcTaskRepositoryIntegrationTest extends Specification {
             result == new TaskEntity(4, 15, TaskStatus.PROCESSING, 1593024953765L, 0L, null)
     }
 
-    def "update a task when task is completed"() {
+    def "update a task when the task is completed"() {
 
         given:
             def taskId = 2
