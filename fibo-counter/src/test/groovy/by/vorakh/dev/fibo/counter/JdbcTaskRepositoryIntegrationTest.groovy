@@ -5,6 +5,7 @@ import by.vorakh.dev.fibo.counter.repository.entity.TaskEntity
 import by.vorakh.dev.fibo.counter.repository.entity.TaskStatus
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.jdbc.Sql
 import spock.lang.Shared
 import spock.lang.Specification
@@ -17,6 +18,7 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 @SpringBootTest
 @Sql(executionPhase = BEFORE_TEST_METHOD, scripts = ["/set_autoincrement.sql", "/insert_test_data.sql"])
 @Sql(executionPhase = AFTER_TEST_METHOD, scripts = ["/clean_up.sql"])
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class JdbcTaskRepositoryIntegrationTest extends Specification {
 
     @Autowired

@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpMethod
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.jdbc.Sql
 import spock.lang.Shared
 import spock.lang.Specification
@@ -19,6 +20,7 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application)
 @Sql(executionPhase = BEFORE_TEST_METHOD, scripts = ["/set_autoincrement.sql", "/insert_test_data.sql"])
 @Sql(executionPhase = AFTER_TEST_METHOD, scripts = ["/clean_up.sql"])
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class ResultIntegrationTest extends Specification {
 
     @LocalServerPort
