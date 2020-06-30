@@ -11,11 +11,10 @@ import by.vorakh.dev.fibo.receiver.model.response.CreationResponse;
 import by.vorakh.dev.fibo.receiver.model.response.ResultResponse;
 import by.vorakh.dev.fibo.receiver.service.TaskService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
-import java.sql.Timestamp;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -24,7 +23,7 @@ import java.util.stream.Stream;
 import static by.vorakh.dev.fibo.receiver.converter.TimeInMillisToUtcDateTimeConverter.convertUtcDateTimeFormat;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
-@Log
+@Log4j2
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
 
@@ -50,8 +49,8 @@ public class TaskServiceImpl implements TaskService {
             .thenCombine(taskRepository.update(taskId, TaskStatus.PROCESSING), (result, avoid) -> result)
             .handle((result, throwable) -> {
                 if ((throwable != null) || (result == null)) {
+                    log.error("Task " + taskId + "was failed");
                     taskRepository.update(taskId, TaskStatus.FAILED);
-                    log.info("Task " + taskId + "was failed");
                     throw new ImpossibleSolvingTaskException();
                 }
                 return result;
@@ -61,9 +60,9 @@ public class TaskServiceImpl implements TaskService {
                 taskRepository.update(taskId, endTime, TaskStatus.COMPLETED, result)
                     .handle((aVoid, throwable) -> {
                         if (throwable != null) {
-                            log.info(throwable.getMessage());
+                            log.error(throwable.getMessage());
                         }
-                        log.info("Task is solved in " + new Timestamp(endTime));
+                        log.info("The '{}' task Task is solved at {}", taskId, convertUtcDateTimeFormat(endTime));
                         return null;
                     });
             });
@@ -91,7 +90,7 @@ public class TaskServiceImpl implements TaskService {
                 try {
                     Thread.sleep(2500L);
                 } catch (InterruptedException e) {
-                    log.info(e.getMessage());
+                    log.error(e.getMessage());
                 }
                 return new BigInteger[]{fibonaccis[1], fibonaccis[0].add(fibonaccis[1])};
             })
