@@ -8,4 +8,5 @@ public class ResultResponse {
 
     private final TaskStatus status;
     private final String result;
+    private final String processingTime;
 }
