@@ -3,18 +3,23 @@ package by.vorakh.dev.fibo.receiver.service.impl;
 import by.vorakh.dev.fibo.counter.repository.TaskRepository;
 import by.vorakh.dev.fibo.counter.repository.entity.TaskEntity;
 import by.vorakh.dev.fibo.counter.repository.entity.TaskStatus;
+import by.vorakh.dev.fibo.receiver.converter.MillisToTimeFormatConverter;
 import by.vorakh.dev.fibo.receiver.exception.ImpossibleSolvingTaskException;
 import by.vorakh.dev.fibo.receiver.exception.NoCompletedTaskException;
 import by.vorakh.dev.fibo.receiver.exception.NoExistTaskException;
+import by.vorakh.dev.fibo.receiver.exception.handler.NotProcessingTimeException;
 import by.vorakh.dev.fibo.receiver.model.payload.SequenceSize;
 import by.vorakh.dev.fibo.receiver.model.response.CreationResponse;
 import by.vorakh.dev.fibo.receiver.model.response.ResultResponse;
 import by.vorakh.dev.fibo.receiver.service.TaskService;
+import by.vorakh.dev.fibo.redis.entity.ProcessingTime;
+import by.vorakh.dev.fibo.redis.repository.ProcessingTimeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -29,6 +34,7 @@ public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
     private final Executor serviceExecutor;
+    private final ProcessingTimeRepository processingTimeRepository;
 
     @Override
     public CompletableFuture<@NotNull CreationResponse> createTask(@NotNull SequenceSize sequenceSize) {
@@ -57,14 +63,18 @@ public class TaskServiceImpl implements TaskService {
             })
             .thenAccept(result -> {
                 long endTime = System.currentTimeMillis();
-                taskRepository.update(taskId, endTime, TaskStatus.COMPLETED, result)
-                    .handle((aVoid, throwable) -> {
-                        if (throwable != null) {
-                            log.error(throwable.getMessage());
-                        }
-                        log.info("The '{}' task Task is solved at {}", taskId, convertUtcDateTimeFormat(endTime));
-                        return null;
-                    });
+                long time = endTime - task.getCreationTime();
+
+                CompletableFuture.allOf(
+                    taskRepository.update(taskId, endTime, TaskStatus.COMPLETED, result),
+                    processingTimeRepository.add(new ProcessingTime(taskId, time))
+                ).handle((aVoid, throwable) -> {
+                    if (throwable != null) {
+                        log.error(throwable.getMessage());
+                    }
+                    log.info("The '{}' task Task is solved at {}", taskId, convertUtcDateTimeFormat(endTime));
+                    return null;
+                });
             });
     }
 
@@ -72,15 +82,24 @@ public class TaskServiceImpl implements TaskService {
     public CompletableFuture<@NotNull ResultResponse> getTaskResult(long taskId) {
 
         return taskRepository.getBy(taskId)
-            .thenApply(task -> {
-                if (task == null) {
-                    throw new NoExistTaskException();
-                }
-                if ((task.getStatus() == TaskStatus.CREATED) || (task.getStatus() == TaskStatus.PROCESSING)) {
-                    throw new NoCompletedTaskException();
-                }
-                return new ResultResponse(task.getStatus(), task.getResult());
-            });
+            .thenCombine(
+                processingTimeRepository.findProcessingTime(taskId),
+                (task, time) -> {
+
+                    if (task == null) {
+                        throw new NoExistTaskException();
+                    }
+                    if ((task.getStatus() == TaskStatus.CREATED) || (task.getStatus() == TaskStatus.PROCESSING)) {
+                        throw new NoCompletedTaskException();
+                    }
+
+                    String processingTime = Optional.ofNullable(time)
+                        .filter(aTime -> (aTime > 0L))
+                        .map(MillisToTimeFormatConverter::convert)
+                        .orElseThrow(NotProcessingTimeException::new);
+
+                    return new ResultResponse(task.getStatus(), task.getResult(), processingTime);
+                });
     }
 
     private @NotNull String createFibonacciLine(int length) {
