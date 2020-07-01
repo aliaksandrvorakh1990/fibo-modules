@@ -4,6 +4,7 @@ import by.vorakh.dev.fibo.counter.configuration.FiboCounterConfiguration;
 import by.vorakh.dev.fibo.counter.repository.TaskRepository;
 import by.vorakh.dev.fibo.receiver.service.TaskService;
 import by.vorakh.dev.fibo.receiver.service.impl.TaskServiceImpl;
+import by.vorakh.dev.fibo.redis.repository.ProcessingTimeRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,9 +47,10 @@ public class AppConfiguration {
     @Bean
     public @NotNull TaskService taskService(
         @NotNull TaskRepository taskRepository,
-        @NotNull @Qualifier("computeExecutor") Executor computeExecutor
+        @NotNull @Qualifier("computeExecutor") Executor computeExecutor,
+        @NotNull ProcessingTimeRepository processingTimeRepository
     ) {
 
-        return new TaskServiceImpl(taskRepository, computeExecutor);
+        return new TaskServiceImpl(taskRepository, computeExecutor, processingTimeRepository);
     }
 }
