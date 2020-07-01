@@ -2,6 +2,7 @@ package by.vorakh.dev.fibo.redis.configuration;
 
 import by.vorakh.dev.fibo.redis.repository.ProcessingTimeRepository;
 import by.vorakh.dev.fibo.redis.repository.impl.ProcessingTimeRepositoryImpl;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +21,7 @@ public class RedisConfiguration {
     private Environment environment;
 
     @Bean
-    JedisConnectionFactory jedisConnectionFactory() {
+    @NotNull JedisConnectionFactory jedisConnectionFactory() {
 
         String hostName = environment.getProperty("redis.hostName");
         int port = environment.getProperty("redis.port", Integer.class);
@@ -30,7 +31,7 @@ public class RedisConfiguration {
     }
 
     @Bean
-    public RedisTemplate<String, Long> redisTemplate(JedisConnectionFactory jedisConnectionFactory) {
+    public @NotNull RedisTemplate<String, Long> redisTemplate(@NotNull JedisConnectionFactory jedisConnectionFactory) {
 
         RedisTemplate<String, Long> template = new RedisTemplate<>();
         template.setConnectionFactory(jedisConnectionFactory);
@@ -38,14 +39,14 @@ public class RedisConfiguration {
     }
 
     @Bean
-    HashOperations<String, Long, Long> operations(RedisTemplate<String, Long> redisTemplate) {
+    @NotNull HashOperations<String, Long, Long> operations(@NotNull RedisTemplate<String, Long> redisTemplate) {
 
         HashOperations<String, Long, Long> ops = redisTemplate.opsForHash();
         return ops;
     }
 
     @Bean
-    ProcessingTimeRepository repository(HashOperations<String, Long, Long> operations) {
+    @NotNull ProcessingTimeRepository processingTimeRepository(@NotNull HashOperations<String, Long, Long> operations) {
 
         String key = environment.getProperty("redis.key");
         return new ProcessingTimeRepositoryImpl(operations, key);
