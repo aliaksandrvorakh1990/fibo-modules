@@ -86,7 +86,7 @@ class ResultIntegrationTest extends Specification {
         then:
             body.path("status").asText() != null
             body.path("status").asText() == "FAILED"
-            body.path("result").isNull() == true
+            body.path("result").asText() != null
     }
 
     def "get no content if a task has the CREATED status in the DB"() {
