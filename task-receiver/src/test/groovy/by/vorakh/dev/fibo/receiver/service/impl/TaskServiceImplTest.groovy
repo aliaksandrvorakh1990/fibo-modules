@@ -6,6 +6,7 @@ import by.vorakh.dev.fibo.counter.repository.entity.TaskStatus
 import by.vorakh.dev.fibo.receiver.exception.NoCompletedTaskException
 import by.vorakh.dev.fibo.receiver.exception.NoExistTaskException
 import by.vorakh.dev.fibo.receiver.model.payload.SequenceSize
+import by.vorakh.dev.fibo.redis.repository.ProcessingTimeRepository
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import spock.lang.Specification
 
@@ -17,14 +18,15 @@ class TaskServiceImplTest extends Specification {
 
     def taskRepository = Mock(TaskRepository)
     def executor = {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(5);
-        executor.setQueueCapacity(500);
-        executor.initialize();
-        return executor;
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor()
+        executor.setCorePoolSize(2)
+        executor.setMaxPoolSize(5)
+        executor.setQueueCapacity(500)
+        executor.initialize()
+        return executor
     }
-    def taskService = new TaskServiceImpl(taskRepository, executor)
+    def processingTimeRepository = Mock(ProcessingTimeRepository)
+    def taskService = new TaskServiceImpl(taskRepository, executor, processingTimeRepository)
 
     def "get a creation response if the task is created and is processing"() {
 
@@ -48,7 +50,7 @@ class TaskServiceImplTest extends Specification {
     def "get a result if the task is solved"() {
 
         given:
-            def taskId = 2L;
+            def taskId = 2L
         and:
             def currentTimeMillis = System.currentTimeMillis()
             def startTime = System.currentTimeMillis()
@@ -60,20 +62,23 @@ class TaskServiceImplTest extends Specification {
             def result = taskService.getTaskResult(taskId)
         then:
             1 * taskRepository.getBy({ it == taskId }) >> completedFuture(solvedTask)
+            1 * processingTimeRepository.findProcessingTime(taskId) >> completedFuture(fiveSeconds)
         then:
             result != null
             result.get().result == fiboResult
             result.get().status == TaskStatus.COMPLETED
+            result.get().processingTime != null
     }
 
     def "thrown NoExistTaskException if a task is not exist"() {
 
         given:
-            def taskId = 34L;
+            def taskId = 34L
         when:
             taskService.getTaskResult(taskId).join()
         then:
             1 * taskRepository.getBy({ it == taskId }) >> completedFuture(null)
+            1 * processingTimeRepository.findProcessingTime(taskId) >> completedFuture(null)
         then:
             def exception = thrown(CompletionException)
             exception.getCause() instanceof NoExistTaskException
@@ -82,7 +87,7 @@ class TaskServiceImplTest extends Specification {
     def "thrown NoCompletedTaskException if the task status is processing"() {
 
         given:
-            def taskId = 5L;
+            def taskId = 5L
         and:
             def startTime = System.currentTimeMillis()
             def processingTask = new TaskEntity(taskId, 2, TaskStatus.PROCESSING, startTime, 0L, null)
@@ -90,6 +95,7 @@ class TaskServiceImplTest extends Specification {
             taskService.getTaskResult(taskId).join()
         then:
             1 * taskRepository.getBy({ it == taskId }) >> completedFuture(processingTask)
+            1 * processingTimeRepository.findProcessingTime(taskId) >> completedFuture(null)
         then:
             def exception = thrown(CompletionException)
             exception.getCause() instanceof NoCompletedTaskException
