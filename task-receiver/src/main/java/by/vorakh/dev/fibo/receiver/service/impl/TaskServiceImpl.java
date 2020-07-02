@@ -96,9 +96,9 @@ public class TaskServiceImpl implements TaskService {
                     String processingTime = Optional.ofNullable(time)
                         .filter(aTime -> (aTime > 0L))
                         .map(MillisToTimeFormatConverter::convert)
-                        .orElseThrow(NotProcessingTimeException::new);
-
-                    return new ResultResponse(task.getStatus(), task.getResult(), processingTime);
+                        .orElse("No data");
+                    String result = Optional.ofNullable(task.getResult()).orElse("No data");
+                    return new ResultResponse(task.getStatus(), result, processingTime);
                 });
     }
 
