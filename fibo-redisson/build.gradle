@@ -1,0 +1,14 @@
+ext {
+    redissonVersion = '3.13.2'
+}
+
+dependencies {
+
+    implementation project(':fibo-base')
+    implementation "org.springframework.data:spring-data-redis:$springDataRedisVersion"
+    implementation "org.redisson:redisson-spring-data-23:$redissonVersion"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompile "org.spockframework:spock-core:$spockVersion"
+    testCompile "org.spockframework:spock-spring:$spockVersion"
+}
