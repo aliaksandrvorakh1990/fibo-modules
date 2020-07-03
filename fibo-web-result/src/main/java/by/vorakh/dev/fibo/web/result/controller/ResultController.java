@@ -1,6 +1,6 @@
-package by.vorakh.dev.fibo.receiver.controller;
+package by.vorakh.dev.fibo.web.result.controller;
 
-import by.vorakh.dev.fibo.receiver.service.TaskService;
+import by.vorakh.dev.fibo.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;

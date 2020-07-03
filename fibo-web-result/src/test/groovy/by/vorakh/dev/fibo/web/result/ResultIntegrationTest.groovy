@@ -1,6 +1,5 @@
-package by.vorakh.dev.fibo.receiver
+package by.vorakh.dev.fibo.web.result
 
-import by.vorakh.dev.fibo.Application
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -17,7 +16,7 @@ import javax.sql.DataSource
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(executionPhase = BEFORE_TEST_METHOD, scripts = ["/set_autoincrement.sql", "/insert_test_data.sql"])
 @Sql(executionPhase = AFTER_TEST_METHOD, scripts = ["/clean_up.sql"])
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)

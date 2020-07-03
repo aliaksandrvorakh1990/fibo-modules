@@ -36,7 +36,7 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="by.vorakh.dev.fibo.receiver.service.impl" level="info" additivity="false">
+        <Logger name="by.vorakh.dev.fibo.base.service.impl" level="info" additivity="false">
             <AppenderRef ref="TaskLog" />
             <AppenderRef ref="Console" />
             <AppenderRef level="error" ref="ErrLog"/>
