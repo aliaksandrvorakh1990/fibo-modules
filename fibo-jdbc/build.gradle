@@ -1,0 +1,18 @@
+
+dependencies {
+    implementation project(':fibo-base')
+
+    implementation "org.springframework:spring-core:$springVersion"
+    implementation "org.springframework:spring-context:$springVersion"
+    implementation "org.springframework:spring-beans:$springVersion"
+    implementation "org.springframework:spring-tx:$springVersion"
+    implementation "org.springframework:spring-jdbc:$springVersion"
+    implementation "mysql:mysql-connector-java:$mysqlVersion"
+    compile "org.flywaydb:flyway-core:$flywayVersion"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    testCompile "org.spockframework:spock-core:$spockVersion"
+    testCompile "org.spockframework:spock-spring:$spockVersion"
+
+}
