@@ -1,19 +1,18 @@
-package by.vorakh.dev.fibo.receiver.service.impl;
+package by.vorakh.dev.fibo.service.impl;
 
-import by.vorakh.dev.fibo.counter.repository.TaskRepository;
-import by.vorakh.dev.fibo.counter.repository.entity.TaskEntity;
-import by.vorakh.dev.fibo.counter.repository.entity.TaskStatus;
-import by.vorakh.dev.fibo.receiver.converter.MillisToTimeFormatConverter;
-import by.vorakh.dev.fibo.receiver.exception.ImpossibleSolvingTaskException;
-import by.vorakh.dev.fibo.receiver.exception.NoCompletedTaskException;
-import by.vorakh.dev.fibo.receiver.exception.NoExistTaskException;
-import by.vorakh.dev.fibo.receiver.exception.handler.NotProcessingTimeException;
-import by.vorakh.dev.fibo.receiver.model.payload.SequenceSize;
-import by.vorakh.dev.fibo.receiver.model.response.CreationResponse;
-import by.vorakh.dev.fibo.receiver.model.response.ResultResponse;
-import by.vorakh.dev.fibo.receiver.service.TaskService;
+import by.vorakh.dev.fibo.base.exception.ImpossibleSolvingTaskException;
+import by.vorakh.dev.fibo.base.exception.NoCompletedTaskException;
+import by.vorakh.dev.fibo.base.exception.NoExistTaskException;
+import by.vorakh.dev.fibo.base.model.SequenceSize;
+import by.vorakh.dev.fibo.base.model.CreationResponse;
+import by.vorakh.dev.fibo.base.model.ResultResponse;
+import by.vorakh.dev.fibo.jdbc.repository.TaskRepository;
+import by.vorakh.dev.fibo.base.entity.TaskEntity;
+import by.vorakh.dev.fibo.base.entity.TaskStatus;
 import by.vorakh.dev.fibo.redis.entity.ProcessingTime;
 import by.vorakh.dev.fibo.redis.repository.ProcessingTimeRepository;
+import by.vorakh.dev.fibo.service.TaskService;
+import by.vorakh.dev.fibo.service.converter.MillisToTimeFormatConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +24,7 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static by.vorakh.dev.fibo.receiver.converter.TimeInMillisToUtcDateTimeConverter.convertUtcDateTimeFormat;
+import static by.vorakh.dev.fibo.service.converter.TimeInMillisToUtcDateTimeConverter.convertUtcDateTimeFormat;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Log4j2
@@ -82,24 +81,26 @@ public class TaskServiceImpl implements TaskService {
     public CompletableFuture<@NotNull ResultResponse> getTaskResult(long taskId) {
 
         return taskRepository.getBy(taskId)
-            .thenCombine(
-                processingTimeRepository.findProcessingTime(taskId),
-                (task, time) -> {
+            .thenCombine(processingTimeRepository.findProcessingTime(taskId)
+                .exceptionally(throwable -> {
+                    log.error("Failed to get execution time from redis for task {}", taskId);
+                    return null;
+                }), (task, time) -> {
 
-                    if (task == null) {
-                        throw new NoExistTaskException();
-                    }
-                    if ((task.getStatus() == TaskStatus.CREATED) || (task.getStatus() == TaskStatus.PROCESSING)) {
-                        throw new NoCompletedTaskException();
-                    }
+                if (task == null) {
+                    throw new NoExistTaskException();
+                }
+                if ((task.getStatus() == TaskStatus.CREATED) || (task.getStatus() == TaskStatus.PROCESSING)) {
+                    throw new NoCompletedTaskException();
+                }
 
-                    String processingTime = Optional.ofNullable(time)
-                        .filter(aTime -> (aTime > 0L))
-                        .map(MillisToTimeFormatConverter::convert)
-                        .orElse("No data");
-                    String result = Optional.ofNullable(task.getResult()).orElse("No data");
-                    return new ResultResponse(task.getStatus(), result, processingTime);
-                });
+                String processingTime = Optional.ofNullable(time)
+                    .filter(aTime -> (aTime > 0L))
+                    .map(MillisToTimeFormatConverter::convert)
+                    .orElse("No data");
+                String result = Optional.ofNullable(task.getResult()).orElse("No data");
+                return new ResultResponse(task.getStatus(), result, processingTime);
+            });
     }
 
     private @NotNull String createFibonacciLine(int length) {

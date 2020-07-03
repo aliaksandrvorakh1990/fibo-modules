@@ -1,12 +1,13 @@
-package by.vorakh.dev.fibo.receiver.service.impl
+package by.vorakh.dev.fibo.service.impl
 
-import by.vorakh.dev.fibo.counter.repository.TaskRepository
-import by.vorakh.dev.fibo.counter.repository.entity.TaskEntity
-import by.vorakh.dev.fibo.counter.repository.entity.TaskStatus
-import by.vorakh.dev.fibo.receiver.exception.NoCompletedTaskException
-import by.vorakh.dev.fibo.receiver.exception.NoExistTaskException
-import by.vorakh.dev.fibo.receiver.model.payload.SequenceSize
+import by.vorakh.dev.fibo.base.entity.TaskEntity
+import by.vorakh.dev.fibo.base.entity.TaskStatus
+import by.vorakh.dev.fibo.base.exception.NoCompletedTaskException
+import by.vorakh.dev.fibo.base.exception.NoExistTaskException
+import by.vorakh.dev.fibo.base.model.SequenceSize
+import by.vorakh.dev.fibo.jdbc.repository.TaskRepository
 import by.vorakh.dev.fibo.redis.repository.ProcessingTimeRepository
+import by.vorakh.dev.fibo.service.impl.TaskServiceImpl
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import spock.lang.Specification
 

@@ -1,4 +1,4 @@
-package by.vorakh.dev.fibo.receiver.converter;
+package by.vorakh.dev.fibo.service.converter;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

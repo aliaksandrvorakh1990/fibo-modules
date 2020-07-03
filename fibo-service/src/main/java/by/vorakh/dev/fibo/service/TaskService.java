@@ -1,8 +1,8 @@
-package by.vorakh.dev.fibo.receiver.service;
+package by.vorakh.dev.fibo.service;
 
-import by.vorakh.dev.fibo.receiver.model.payload.SequenceSize;
-import by.vorakh.dev.fibo.receiver.model.response.CreationResponse;
-import by.vorakh.dev.fibo.receiver.model.response.ResultResponse;
+import by.vorakh.dev.fibo.base.model.SequenceSize;
+import by.vorakh.dev.fibo.base.model.CreationResponse;
+import by.vorakh.dev.fibo.base.model.ResultResponse;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;

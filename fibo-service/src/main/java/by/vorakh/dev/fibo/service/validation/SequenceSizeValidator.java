@@ -1,6 +1,6 @@
-package by.vorakh.dev.fibo.receiver.validation;
+package by.vorakh.dev.fibo.service.validation;
 
-import by.vorakh.dev.fibo.receiver.model.payload.SequenceSize;
+import by.vorakh.dev.fibo.base.model.SequenceSize;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;

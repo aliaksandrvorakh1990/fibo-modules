@@ -1,9 +1,10 @@
-package by.vorakh.dev.fibo.receiver.configuration;
+package by.vorakh.dev.fibo.service.configuration;
 
-import by.vorakh.dev.fibo.counter.configuration.FiboCounterConfiguration;
-import by.vorakh.dev.fibo.counter.repository.TaskRepository;
-import by.vorakh.dev.fibo.receiver.service.TaskService;
-import by.vorakh.dev.fibo.receiver.service.impl.TaskServiceImpl;
+import by.vorakh.dev.fibo.jdbc.configuration.FiboJdbcConfiguration;
+import by.vorakh.dev.fibo.jdbc.repository.TaskRepository;
+import by.vorakh.dev.fibo.redis.configuration.RedisConfiguration;
+import by.vorakh.dev.fibo.service.TaskService;
+import by.vorakh.dev.fibo.service.impl.TaskServiceImpl;
 import by.vorakh.dev.fibo.redis.repository.ProcessingTimeRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,8 @@ import java.util.concurrent.Executor;
 
 @Configuration
 @PropertySource("classpath:service-executor.properties")
-@Import(FiboCounterConfiguration.class)
-public class AppConfiguration {
+@Import({FiboJdbcConfiguration.class, RedisConfiguration.class})
+public class ServiceConfiguration {
 
     @Autowired
     private Environment environment;
