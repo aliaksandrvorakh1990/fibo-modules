@@ -1,7 +1,6 @@
-package by.vorakh.dev.fibo.receiver
+package by.vorakh.dev.fibo.web.task
 
-import by.vorakh.dev.fibo.Application
-import by.vorakh.dev.fibo.receiver.model.payload.SequenceSize
+import by.vorakh.dev.fibo.base.model.SequenceSize
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -16,7 +15,7 @@ import spock.lang.Specification
 
 import javax.sql.DataSource
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class TaskIntegrationTest extends Specification {
 

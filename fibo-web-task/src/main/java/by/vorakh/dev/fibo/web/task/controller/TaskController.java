@@ -1,8 +1,9 @@
-package by.vorakh.dev.fibo.receiver.controller;
+package by.vorakh.dev.fibo.web.task.controller;
 
-import by.vorakh.dev.fibo.receiver.exception.IncorrectFibonacciSequenceSizeException;
-import by.vorakh.dev.fibo.receiver.model.payload.SequenceSize;
-import by.vorakh.dev.fibo.receiver.service.TaskService;
+import by.vorakh.dev.fibo.base.exception.IncorrectFibonacciSequenceSizeException;
+import by.vorakh.dev.fibo.base.model.SequenceSize;
+import by.vorakh.dev.fibo.service.TaskService;
+import by.vorakh.dev.fibo.service.validation.SequenceSizeValidator;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
@@ -13,8 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.concurrent.CompletableFuture;
 
-import static by.vorakh.dev.fibo.receiver.validation.SequenceSizeValidator.isCorrectSize;
-
 @RestController
 @RequiredArgsConstructor
 public class TaskController {
@@ -24,7 +23,7 @@ public class TaskController {
     @PostMapping("/task")
     public @NotNull CompletableFuture<ResponseEntity<?>> createTask(@RequestBody @NotNull SequenceSize sequenceSize) {
 
-        if (!isCorrectSize(sequenceSize)) {
+        if (!SequenceSizeValidator.isCorrectSize(sequenceSize)) {
             throw new IncorrectFibonacciSequenceSizeException();
         }
 
