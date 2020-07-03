@@ -1,4 +1,4 @@
-package by.vorakh.dev.fibo.receiver.exception.handler;
+package by.vorakh.dev.fibo.base.exception;
 
 public class NotProcessingTimeException extends RuntimeException {
 
