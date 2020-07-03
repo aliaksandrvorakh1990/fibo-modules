@@ -2,9 +2,6 @@ dependencies {
 
     implementation "org.springframework.data:spring-data-redis:$springDataRedisVersion"
     implementation "redis.clients:jedis:$jedisVersion"
-
-    // implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
     testCompile "org.spockframework:spock-core:$spockVersion"
