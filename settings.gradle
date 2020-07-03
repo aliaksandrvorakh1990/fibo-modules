@@ -1,6 +1,5 @@
 rootProject.name = 'fibo-modules'
 
-include 'task-receiver'
 include 'fibo-jdbc'
 include 'fibo-redis'
 include 'fibo-service'
