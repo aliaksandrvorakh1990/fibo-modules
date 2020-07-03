@@ -1,4 +1,4 @@
-package by.vorakh.dev.fibo.receiver.model.payload;
+package by.vorakh.dev.fibo.base.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

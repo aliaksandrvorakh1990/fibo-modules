@@ -1,4 +1,4 @@
-package by.vorakh.dev.fibo.counter.repository.entity;
+package by.vorakh.dev.fibo.base.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

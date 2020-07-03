@@ -1,4 +1,4 @@
-package by.vorakh.dev.fibo.receiver.model.response;
+package by.vorakh.dev.fibo.base.model;
 
 import lombok.Data;
 

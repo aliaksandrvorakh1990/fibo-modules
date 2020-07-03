@@ -1,6 +1,6 @@
-package by.vorakh.dev.fibo.receiver.model.response;
+package by.vorakh.dev.fibo.base.model;
 
-import by.vorakh.dev.fibo.counter.repository.entity.TaskStatus;
+import by.vorakh.dev.fibo.base.entity.TaskStatus;
 import lombok.Data;
 
 @Data
