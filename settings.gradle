@@ -5,6 +5,9 @@ include 'fibo-redis'
 include 'fibo-service'
 include 'fibo-web-result'
 include 'fibo-web-task'
+
+include 'fibo-webflux-task'
+
 include 'fibo-base'
 include 'fibo-redisson'
 include 'fibo-r2dbc'
