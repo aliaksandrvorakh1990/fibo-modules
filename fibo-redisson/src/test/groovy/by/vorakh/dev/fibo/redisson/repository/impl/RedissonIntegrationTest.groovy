@@ -1,7 +1,7 @@
 package by.vorakh.dev.fibo.redisson.repository.impl
 
 import by.vorakh.dev.fibo.base.entity.ProcessingTime
-import by.vorakh.dev.fibo.redisson.repository.ProcessingTimeRepository
+import by.vorakh.dev.fibo.redisson.repository.ReactiveProcessingTimeRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Specification
@@ -10,14 +10,14 @@ import spock.lang.Specification
 class RedissonIntegrationTest extends Specification {
 
     @Autowired
-    ProcessingTimeRepository repository
+    ReactiveProcessingTimeRepository repository
 
     def "get True when a processing time is added in Redis"() {
 
         given:
             def processingTime = new ProcessingTime(25L, 200024L)
         when:
-            def result = repository.add(processingTime).toFuture().join()
+            def result = repository.add(processingTime).block()
         then:
             result == true
     }
@@ -27,7 +27,7 @@ class RedissonIntegrationTest extends Specification {
         given:
             def taskId = 2452529757338L
         when:
-            def result = repository.getBy(taskId).toFuture().join()
+            def result = repository.getBy(taskId).block()
         then:
             result == null
     }
@@ -38,7 +38,7 @@ class RedissonIntegrationTest extends Specification {
             def taskId = 24L
             def time = 200024L
             def processingTime = new ProcessingTime(taskId, time)
-            repository.add(processingTime).toFuture().join()
+            repository.add(processingTime).block()
         when:
             def result = repository.getBy(taskId).toFuture().join()
         then:

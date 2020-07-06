@@ -3,7 +3,7 @@ package by.vorakh.dev.fibo.redisson.repository;
 import by.vorakh.dev.fibo.base.entity.ProcessingTime;
 import reactor.core.publisher.Mono;
 
-public interface ProcessingTimeRepository {
+public interface ReactiveProcessingTimeRepository {
 
     Mono<ProcessingTime> getBy(Long taskId);
 

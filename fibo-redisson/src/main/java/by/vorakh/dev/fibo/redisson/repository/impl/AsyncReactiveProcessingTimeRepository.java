@@ -1,13 +1,13 @@
 package by.vorakh.dev.fibo.redisson.repository.impl;
 
 import by.vorakh.dev.fibo.base.entity.ProcessingTime;
-import by.vorakh.dev.fibo.redisson.repository.ProcessingTimeRepository;
+import by.vorakh.dev.fibo.redisson.repository.ReactiveProcessingTimeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
-public class AsyncProcessingTimeRepository implements ProcessingTimeRepository {
+public class AsyncReactiveProcessingTimeRepository implements ReactiveProcessingTimeRepository {
 
     private final ReactiveRedisTemplate<Long, ProcessingTime> redisTemplate;
 

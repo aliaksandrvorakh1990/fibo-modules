@@ -1,12 +1,13 @@
 package by.vorakh.dev.fibo.redisson.configuration;
 
 import by.vorakh.dev.fibo.base.entity.ProcessingTime;
-import by.vorakh.dev.fibo.redisson.repository.ProcessingTimeRepository;
-import by.vorakh.dev.fibo.redisson.repository.impl.AsyncProcessingTimeRepository;
+import by.vorakh.dev.fibo.redisson.repository.ReactiveProcessingTimeRepository;
+import by.vorakh.dev.fibo.redisson.repository.impl.AsyncReactiveProcessingTimeRepository;
 import org.jetbrains.annotations.NotNull;
 import org.redisson.config.Config;
 import org.redisson.spring.data.connection.RedissonConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -35,13 +36,18 @@ public class RedissonConfiguration {
             .toString();
 
         Config config = new Config();
-        config.useSingleServer().setAddress(address);
+        config.useSingleServer()
+            .setAddress(address)
+            .setConnectionPoolSize(environment.getRequiredProperty("redisson.maxPoolSize", Integer.class))
+            .setConnectionMinimumIdleSize(environment.getRequiredProperty("redisson.minIdleSize", Integer.class));//
 
         return new RedissonConnectionFactory(config);
     }
 
     @Bean
-    ReactiveRedisTemplate<Long, ProcessingTime> redisTemplate(ReactiveRedisConnectionFactory factory) {
+    ReactiveRedisTemplate<Long, ProcessingTime> redisTemplate(
+        @Qualifier("redissonConnectionFactory") ReactiveRedisConnectionFactory factory
+    ) {
 
         Jackson2JsonRedisSerializer<ProcessingTime> serializer =
             new Jackson2JsonRedisSerializer<>(ProcessingTime.class);
@@ -54,9 +60,9 @@ public class RedissonConfiguration {
         return new ReactiveRedisTemplate<>(factory, context);
     }
 
-    @Bean
-    ProcessingTimeRepository processingTimeRepository(ReactiveRedisTemplate<Long, ProcessingTime> redisTemplate) {
+    @Bean("redisonProcessingTimeRepository")
+    ReactiveProcessingTimeRepository processingTimeRepository(ReactiveRedisTemplate<Long, ProcessingTime> redisTemplate) {
 
-        return new AsyncProcessingTimeRepository(redisTemplate);
+        return new AsyncReactiveProcessingTimeRepository(redisTemplate);
     }
 }
