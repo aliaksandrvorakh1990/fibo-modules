@@ -1,16 +1,16 @@
 package by.vorakh.dev.fibo.service.impl;
 
+import by.vorakh.dev.fibo.base.entity.ProcessingTime;
+import by.vorakh.dev.fibo.base.entity.TaskEntity;
+import by.vorakh.dev.fibo.base.entity.TaskStatus;
 import by.vorakh.dev.fibo.base.exception.ImpossibleSolvingTaskException;
 import by.vorakh.dev.fibo.base.exception.NoCompletedTaskException;
 import by.vorakh.dev.fibo.base.exception.NoExistTaskException;
-import by.vorakh.dev.fibo.base.model.SequenceSize;
 import by.vorakh.dev.fibo.base.model.CreationResponse;
 import by.vorakh.dev.fibo.base.model.ResultResponse;
+import by.vorakh.dev.fibo.base.model.SequenceSize;
+import by.vorakh.dev.fibo.base.repository.ProcessingTimeRepository;
 import by.vorakh.dev.fibo.jdbc.repository.TaskRepository;
-import by.vorakh.dev.fibo.base.entity.TaskEntity;
-import by.vorakh.dev.fibo.base.entity.TaskStatus;
-import by.vorakh.dev.fibo.redis.entity.ProcessingTime;
-import by.vorakh.dev.fibo.redis.repository.ProcessingTimeRepository;
 import by.vorakh.dev.fibo.service.TaskService;
 import by.vorakh.dev.fibo.service.converter.MillisToTimeFormatConverter;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +54,7 @@ public class TaskServiceImpl implements TaskService {
             .thenCombine(taskRepository.update(taskId, TaskStatus.PROCESSING), (result, avoid) -> result)
             .handle((result, throwable) -> {
                 if ((throwable != null) || (result == null)) {
-                    log.error("Task " + taskId + "was failed");
+                log.error("Task {} was failed", taskId);
                     taskRepository.update(taskId, TaskStatus.FAILED);
                     throw new ImpossibleSolvingTaskException();
                 }
@@ -80,27 +80,27 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public CompletableFuture<@NotNull ResultResponse> getTaskResult(long taskId) {
 
-        return taskRepository.getBy(taskId)
-            .thenCombine(processingTimeRepository.findProcessingTime(taskId)
+        return taskRepository.getBy(taskId).thenApply(task -> {
+            if (task == null) {
+                throw new NoExistTaskException();
+            }
+            if ((task.getStatus() == TaskStatus.CREATED) || (task.getStatus() == TaskStatus.PROCESSING)) {
+                throw new NoCompletedTaskException();
+            }
+
+            Long time = processingTimeRepository.findProcessingTime(taskId)
                 .exceptionally(throwable -> {
                     log.error("Failed to get execution time from redis for task {}", taskId);
                     return null;
-                }), (task, time) -> {
+                }).join();
 
-                if (task == null) {
-                    throw new NoExistTaskException();
-                }
-                if ((task.getStatus() == TaskStatus.CREATED) || (task.getStatus() == TaskStatus.PROCESSING)) {
-                    throw new NoCompletedTaskException();
-                }
-
-                String processingTime = Optional.ofNullable(time)
-                    .filter(aTime -> (aTime > 0L))
-                    .map(MillisToTimeFormatConverter::convert)
-                    .orElse("No data");
-                String result = Optional.ofNullable(task.getResult()).orElse("No data");
-                return new ResultResponse(task.getStatus(), result, processingTime);
-            });
+            String processingTime = Optional.ofNullable(time)
+                .filter(aTime -> (aTime > 0L))
+                .map(MillisToTimeFormatConverter::convert)
+                .orElse("No data");
+            String result = Optional.ofNullable(task.getResult()).orElse("No data");
+            return new ResultResponse(task.getStatus(), result, processingTime);
+        });
     }
 
     private @NotNull String createFibonacciLine(int length) {

@@ -5,9 +5,8 @@ import by.vorakh.dev.fibo.base.entity.TaskStatus
 import by.vorakh.dev.fibo.base.exception.NoCompletedTaskException
 import by.vorakh.dev.fibo.base.exception.NoExistTaskException
 import by.vorakh.dev.fibo.base.model.SequenceSize
+import by.vorakh.dev.fibo.base.repository.ProcessingTimeRepository
 import by.vorakh.dev.fibo.jdbc.repository.TaskRepository
-import by.vorakh.dev.fibo.redis.repository.ProcessingTimeRepository
-import by.vorakh.dev.fibo.service.impl.TaskServiceImpl
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import spock.lang.Specification
 
@@ -79,7 +78,6 @@ class TaskServiceImplTest extends Specification {
             taskService.getTaskResult(taskId).join()
         then:
             1 * taskRepository.getBy({ it == taskId }) >> completedFuture(null)
-            1 * processingTimeRepository.findProcessingTime(taskId) >> completedFuture(null)
         then:
             def exception = thrown(CompletionException)
             exception.getCause() instanceof NoExistTaskException
@@ -96,7 +94,6 @@ class TaskServiceImplTest extends Specification {
             taskService.getTaskResult(taskId).join()
         then:
             1 * taskRepository.getBy({ it == taskId }) >> completedFuture(processingTask)
-            1 * processingTimeRepository.findProcessingTime(taskId) >> completedFuture(null)
         then:
             def exception = thrown(CompletionException)
             exception.getCause() instanceof NoCompletedTaskException

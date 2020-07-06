@@ -1,11 +1,13 @@
 package by.vorakh.dev.fibo.service.configuration;
 
+import by.vorakh.dev.fibo.base.repository.ProcessingTimeRepository;
 import by.vorakh.dev.fibo.jdbc.configuration.FiboJdbcConfiguration;
 import by.vorakh.dev.fibo.jdbc.repository.TaskRepository;
-import by.vorakh.dev.fibo.redis.configuration.RedisConfiguration;
+import by.vorakh.dev.fibo.service.adapter.AsyncProcessingTimeRepositoryAdapter;
+import by.vorakh.dev.fibo.redisson.configuration.RedissonConfiguration;
+import by.vorakh.dev.fibo.redisson.repository.ReactiveProcessingTimeRepository;
 import by.vorakh.dev.fibo.service.TaskService;
 import by.vorakh.dev.fibo.service.impl.TaskServiceImpl;
-import by.vorakh.dev.fibo.redis.repository.ProcessingTimeRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,7 +22,7 @@ import java.util.concurrent.Executor;
 
 @Configuration
 @PropertySource("classpath:service-executor.properties")
-@Import({FiboJdbcConfiguration.class, RedisConfiguration.class})
+@Import({FiboJdbcConfiguration.class, RedissonConfiguration.class})
 public class ServiceConfiguration {
 
     @Autowired
@@ -29,10 +31,10 @@ public class ServiceConfiguration {
     @Bean(name = "computeExecutor")
     public @NotNull Executor computeExecutor() {
 
-        int corePoolSize = environment.getProperty("executor.service.corePoolSize", Integer.class);
-        int maxPoolSize = environment.getProperty("executor.service.maxPoolSize", Integer.class);
-        int queueCapacity = environment.getProperty("executor.service.queueCapacity", Integer.class);
-        String threadNamePrefix = environment.getProperty("executor.service.threadNamePrefix");
+        int corePoolSize = environment.getRequiredProperty("executor.service.corePoolSize", Integer.class);
+        int maxPoolSize = environment.getRequiredProperty("executor.service.maxPoolSize", Integer.class);
+        int queueCapacity = environment.getRequiredProperty("executor.service.queueCapacity", Integer.class);
+        String threadNamePrefix = environment.getRequiredProperty("executor.service.threadNamePrefix");
 
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
@@ -43,6 +45,13 @@ public class ServiceConfiguration {
         executor.initialize();
 
         return executor;
+    }
+
+    @Bean
+    @NotNull ProcessingTimeRepository processingTimeRepository(
+        @NotNull @Qualifier("redisonProcessingTimeRepository") ReactiveProcessingTimeRepository processingTimeRepository
+    ) {
+        return new AsyncProcessingTimeRepositoryAdapter(processingTimeRepository);
     }
 
     @Bean
