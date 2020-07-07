@@ -1,11 +1,17 @@
 ext {
+    springR2dbcVersion = '1.1.1.RELEASE'
+    r2dbcMySQLVersion = '0.8.1.RELEASE'
+    r2dbcPoolVersion = '0.8.1.RELEASE'
 }
 
 dependencies {
-
     implementation project(':fibo-base')
-
+    implementation project(':fibo-jdbc')
+    implementation "org.springframework.data:spring-data-r2dbc:$springR2dbcVersion"
+    implementation "dev.miku:r2dbc-mysql:$r2dbcMySQLVersion"
+    compile('io.projectreactor:reactor-test')
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompile('io.projectreactor:reactor-test')
     testCompile "org.spockframework:spock-core:$spockVersion"
     testCompile "org.spockframework:spock-spring:$spockVersion"
 }
