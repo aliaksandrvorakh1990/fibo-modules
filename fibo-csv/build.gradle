@@ -1,0 +1,16 @@
+
+dependencies {
+
+    implementation project(':fibo-base')
+
+    implementation project(':fibo-r2dbc')
+
+    implementation "org.springframework:spring-core:$springVersion"
+    implementation "org.springframework:spring-context:$springVersion"
+    implementation "org.springframework:spring-beans:$springVersion"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompile "org.spockframework:spock-core:$spockVersion"
+    testCompile "org.spockframework:spock-spring:$spockVersion"
+
+}
